@@ -6,11 +6,13 @@ import numpy as np
 pygame.init()
 
 
-amnt = 45
+height_s = 52
+width_s = 96
 square_size = 20
-width = amnt * square_size
-height = width + 50
+width = width_s * square_size
+height = (height_s * square_size) + 40
 t = 50
+text_margin = height - 40
 win = pygame.display.set_mode((width, height))
 running = False
 
@@ -19,15 +21,7 @@ pygame.display.set_caption("John Conway's Game of Life")
 white = (225, 225, 225)
 gray = (128, 128, 128)
 black = (0, 0, 0)
-grid = [[0 for i in range(amnt)] for i in range(amnt)]
-
-arr = np.array(grid)
-
-np.save('test2.npy', arr)
-grid = np.load('test2.npy').tolist()
-print(arr)
-print(grid)
-
+grid = [[0 for i in range(height_s)] for i in range(width_s)]
 
 save_slots = [i for i in range(48, 58)]
 
@@ -68,7 +62,7 @@ def main():
     state_save = False
     state_load = False
 
-    win.blit(text, (25, height - 45))
+    win.blit(text, (25, text_margin))
 
     while True:
 
@@ -78,22 +72,27 @@ def main():
 
         for event in pygame.event.get():
 
+            mouse_pos = pygame.mouse.get_pos()
+            pygame.draw.rect(win, black, pygame.Rect(375, text_margin, width, square_size * 2), 0)
+            win.blit(font.render(f'Mouse = {((mouse_pos[1] / 100).__round__(1) * (width_s/(width/100))).__round__(1)}, {((mouse_pos[0] / 100).__round__(1) * (height_s/(height_s/5))).__round__(1)}', False, gray), (width - 375, text_margin))
+
             if pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
-                vert = ((pos[0] / 100).__round__(1) * (amnt/(width/100))).__round__(1)
-                hor = ((pos[1] / 100).__round__(1) * (amnt/(width/100))).__round__(1)
+                vert = ((pos[0] / 100).__round__(1) * (height_s/(height_s/5))).__round__(1)
+                hor = ((pos[1] / 100).__round__(1) * (width_s/(width/100))).__round__(1)
+
                 try:
-                    if hor < amnt or vert < amnt:
+                    if hor < width_s or vert < height_s:
                         grid[int(vert)][int(hor)] = 1
                 except IndexError:
                     pass
 
             if pygame.mouse.get_pressed()[2]:
                 pos = pygame.mouse.get_pos()
-                vert = ((pos[0] / 100).__round__(1) * (amnt/(width/100))).__round__(1)
-                hor = ((pos[1] / 100).__round__(1) * (amnt/(width/100))).__round__(1)
+                vert = ((pos[0] / 100).__round__(1) * (height_s/(height_s/5))).__round__(1)
+                hor = ((pos[1] / 100).__round__(1) * (width_s/(width/100))).__round__(1)
                 try:
-                    if hor < amnt or vert < amnt:
+                    if hor < width_s - 1 or vert < height_s - 1:
                         grid[int(vert)][int(hor)] = 0
                 except IndexError:
                     pass
@@ -107,23 +106,26 @@ def main():
                     if t != 50:
                         t -= 50
                         t = t.__round__(1)
-                        pygame.draw.rect(win, black, pygame.Rect(25, height - 45, width, square_size * 2), 0)
-                        text = font.render(f'Interval = {t} ms', False, gray)
-                        win.blit(text, (25, height - 45))
-                        print(t)
-                    else:
-                        print(t)
+                        pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                        win.blit(font.render(f'Interval = {t} ms', False, gray), (25, text_margin))
+                    elif t == 50:
+                        t = 1
+                        t = t.__round__(1)
+                        pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                        win.blit(font.render(f'Interval = {t} ms', False, gray), (25, text_margin))
 
                 elif event.key == pygame.K_LEFT:
                     if t != 1000:
-                        t += 50
-                        t = t.__round__(1)
-                        pygame.draw.rect(win, black, pygame.Rect(25, height - 45, width, square_size * 2), 0)
-                        text = font.render(f'Interval = {t} ms', False, gray)
-                        win.blit(text, (25, height - 45))
-                        print(t)
-                    else:
-                        print(t)
+                        if t == 1:
+                            t = 50
+                            t = t.__round__(1)
+                            pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                            win.blit(font.render(f'Interval = {t} ms', False, gray), (25, text_margin))
+                        else:
+                            t += 50
+                            t = t.__round__(1)
+                            pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                            win.blit(font.render(f'Interval = {t} ms', False, gray), (25, text_margin))
 
                 elif event.key == pygame.K_RETURN:
                     life()
@@ -135,50 +137,50 @@ def main():
                         running = True
 
                 elif event.key == pygame.K_c:
-                    grid = [[0 for i in range(amnt)] for i in range(amnt)]
+                    grid = [[0 for x in range(height_s)] for y in range(width_s)]
 
                 elif event.key == pygame.K_r:
-                    grid = [[random.randint(0, 1) for i in range(amnt)] for i in range(amnt)]
+                    grid = [[random.randint(0, 1) for x in range(height_s)] for y in range(width_s)]
 
                 elif event.key == pygame.K_s:
-                    pygame.draw.rect(win, black, pygame.Rect(25, height - 45, width, square_size * 2), 0)
-                    win.blit(font.render('Input number 0-9 to save or ESC to cancel.', False, gray), (25, height - 45))
+                    pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                    win.blit(font.render('Input number 0-9 to save or ESC to cancel.', False, gray), (25, text_margin))
                     state_save = True
                     running = False
 
                 elif state_save == True and int(event.key) in save_slots:
                     np.save(f'{event.key}.npy', np.array(grid))
-                    pygame.draw.rect(win, black, pygame.Rect(25, height - 45, width, square_size * 2), 0)
-                    text = font.render(f'Interval = {t} ms', False, gray)
-                    win.blit(text, (25, height - 45))
+                    pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                    win.blit(font.render(f'Interval = {t} ms', False, gray), (25, text_margin))
                     state_save = False
 
                 elif event.key == pygame.K_l:
-                    pygame.draw.rect(win, black, pygame.Rect(25, height - 45, width, square_size * 2), 0)
-                    win.blit(font.render('Input number 0-9 to load or ESC to cancel.', False, gray), (25, height - 45))
+                    pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                    win.blit(font.render('Input number 0-9 to load or ESC to cancel.', False, gray), (25, text_margin))
                     state_load = True
                     running = False
 
                 elif state_load == True and int(event.key) in save_slots:
                     grid = np.load(f'{event.key}.npy').tolist()
-                    pygame.draw.rect(win, black, pygame.Rect(25, height - 45, width, square_size * 2), 0)
-                    text = font.render(f'Interval = {t} ms', False, gray)
-                    win.blit(text, (25, height - 45))
+                    pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                    win.blit(font.render(f'Interval = {t} ms', False, gray), (25, text_margin))
                     state_load = False
 
                 elif state_save == True:
                     if event.key == pygame.K_ESCAPE:
-                        pygame.draw.rect(win, black, pygame.Rect(25, height - 45, width, square_size * 2), 0)
-                        text = font.render(f'Interval = {t} ms', False, gray)
-                        win.blit(text, (25, height - 45))
+                        pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                        win.blit(font.render(f'Interval = {t} ms', False, gray), (25, text_margin))
                         state_save = False
 
                 elif state_load == True:
                     if event.key == pygame.K_ESCAPE:
-                        pygame.draw.rect(win, black, pygame.Rect(25, height - 45, width, square_size * 2), 0)
-                        text = font.render(f'Interval = {t} ms', False, gray)
-                        win.blit(text, (25, height - 45))
+                        pygame.draw.rect(win, black, pygame.Rect(25, text_margin, width, square_size * 2), 0)
+                        win.blit(font.render(f'Interval = {t} ms', False, gray), (25, text_margin))
                         state_load = False
+
+                elif event.key == pygame.K_q and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    pygame.quit()
+                    sys.exit()
 
         for x in range(0, len(grid)):
             for y in range(0, len(grid[x])):
