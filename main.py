@@ -21,7 +21,7 @@ pygame.display.set_caption("John Conway's Game of Life")
 white = (225, 225, 225)
 gray = (128, 128, 128)
 black = (0, 0, 0)
-grid = [[0 for i in range(height_s)] for i in range(width_s)]
+grid = [[0 for i in range(height_s)] for j in range(width_s)]
 
 save_slots = [i for i in range(48, 58)]
 
